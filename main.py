@@ -1,6 +1,6 @@
-import pygame, os, sys, random, time, math
+import pygame, os, sys, random, time, math, copy
 
-size = width, height = 1000, 1000
+size = width, height = 1500, 1000
 screen = pygame.display.set_mode(size)
 
 def load_image(name, colorkey=None):
@@ -23,7 +23,6 @@ class Kaboom(pygame.sprite.Sprite):
     def __init__(self, pos, image):
         super().__init__(all_sprites)
         self.image = load_image(image, -1)
-        self.image = pygame.transform.rotate(self.image, - 45)
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
@@ -42,20 +41,23 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, pos, image):
         super().__init__(all_sprites)
         self.image = load_image(image, -1)
-        self.image = pygame.transform.rotate(self.image, - 45)
+        self.vector = copy.deepcopy(AA_vect)
+        self.image = pygame.transform.rotate(self.image, 0 -(self.vector.get_ang()))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.vector = Vect(315, 1)
         
     def update(self):
         if self.rect.x not in range(width) or self.rect.y not in range(height):
             self.kill()
         k = False
         for i in all_sprites.sprites():
-            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Plane':
+            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Bomber':
+                k = True
+                bang = i
+            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Fighter':
                 k = True
                 bang = i
         if not pygame.sprite.collide_mask(self, mountain) and not k:
@@ -82,6 +84,9 @@ class Vect():
     def tuple(self):
         return dt * self.mod * math.cos(math.radians(self.ang)), dt * self.mod * math.sin(math.radians(self.ang))
 
+    def get_ang(self):
+        return self.ang
+
 
 class Background(pygame.sprite.Sprite):
     def __init__(self, image):
@@ -93,29 +98,45 @@ class Background(pygame.sprite.Sprite):
 
 
 class Plane(pygame.sprite.Sprite):
-    def __init__(self, pos, image):
+    def __init__(self, pos, image, spd):
         super().__init__(all_sprites)
         self.image = load_image(image, -1)
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = pos[0]
         self.rect.y = pos[1]
-        self.vector = Vect(180, 0.2)
+        self.vector = Vect(180, spd)
 
     def update(self):
+        if self.rect.x not in range(width) or self.rect.y not in range(height):
+            self.kill()
         if not pygame.sprite.collide_mask(self, mountain):
             self.rect = self.rect.move(*self.vector.tuple())
+
+
+class Bomber(Plane):
+    def __init__(self, pos):
+        super().__init__(pos, 'bmb.png', 0.3)
+
+
+class Fighter(Plane):
+    def __init__(self, pos):
+        super().__init__(pos, 'fgt.png', 0.6)
+
+
+AA_vect = Vect(270, 1)
 
 
 if __name__ == '__main__':
     pygame.display.set_caption('PyGameProject')
     pygame.init()
     fc = 0
+    lvlcount = 240
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     mountain = Background('lvl1.png')
     running = check = True
-    shoot = False
+    shoot = tl = tr = False
     while running:
         screen.fill((66, 170, 255))
         all_sprites.draw(screen)
@@ -124,16 +145,37 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                Plane(event.pos, 'pln1.png')
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     shoot = True
+                if event.key == pygame.K_LEFT:
+                    tl = True
+                if event.key == pygame.K_RIGHT:
+                    tr = True
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_SPACE:
                     shoot = False
+                if event.key == pygame.K_LEFT:
+                    tl = False
+                if event.key == pygame.K_RIGHT:
+                    tr = False
         if shoot and fc % 12 == 0:
             Bullet((420, 530), 'blt1.png')
+        if fc < 10000:
+            if fc % lvlcount == 0:
+                Bomber((width - 1, random.randint(0, 250)))
+        else:
+            if fc % lvlcount == 0:
+                if random.choice([True, False]):
+                    Bomber((width - 1, random.randint(0, 250)))
+                else:
+                    Fighter((width - 1, random.randint(0, 350)))
+        if tl:
+            AA_vect.turn(-1)
+        if tr:
+            AA_vect.turn(1)
         fc += 1
+        if fc % 10000 == 0:
+            lvlcount //= 2
         pygame.display.flip()
     pygame.quit()
