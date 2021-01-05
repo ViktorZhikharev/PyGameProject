@@ -1,4 +1,4 @@
-import pygame, os, sys, random, datetime, math, copy
+import pygame, os, sys, random, time, datetime, math, copy
 
 size = width, height = 1500, 1000
 screen = pygame.display.set_mode(size)
@@ -20,17 +20,14 @@ def load_image(name, colorkey=None):
 
 
 class PGlist:
-    # создание поля
     def __init__(self, height):
         self.width = 1
         self.height = height
         self.board = [[0] * 1 for _ in range(height)]
-        # значения по умолчанию
         self.left = 10
         self.top = 10
         self.cell_size = 30
 
-    # настройка внешнего вида
     def set_view(self, left, top, cell_size):
         self.left = left
         self.top = top
@@ -59,6 +56,9 @@ class PGlist:
         global selector, check
         if cell_coords == (1, 0):
             selector = 1
+            check = False
+        if cell_coords == (0, 0):
+            selector = 100
             check = False
 
 
@@ -282,6 +282,12 @@ if __name__ == '__main__':
                 text1_w = text1.get_width()
                 text1_h = text1.get_height()
                 screen.blit(text1, (text1_x, text1_y))
+                text2 = font.render('Help', True, (255, 255, 255))
+                text2_x = 350 - text2.get_width() // 2
+                text2_y = 150 - text2.get_height() // 2
+                text2_w = text2.get_width()
+                text2_h = text2.get_height()
+                screen.blit(text2, (text2_x, text2_y))
                 pygame.display.flip()
         if selector == 1:
             mountain = Background('lvl1.png')
@@ -337,6 +343,7 @@ if __name__ == '__main__':
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             running = False
+                            finexit = True
                         if event.type == pygame.KEYDOWN:
                             if event.key == pygame.K_SPACE:
                                 shoot = True
@@ -351,6 +358,9 @@ if __name__ == '__main__':
                                 tl = False
                             if event.key == pygame.K_RIGHT:
                                 tr = False
+                            if event.key == pygame.K_ESCAPE:
+                                running = False
+                                selector = 0
                     if shoot and fc % spd == 0 and ammo != 0:
                         if fc < 50000:
                             ammo -= 1
@@ -393,8 +403,29 @@ if __name__ == '__main__':
                         spd = 4
                     if fc == 50000:
                         spd = 18
-            if not running:
-                break
+        if selector == 100:
+            f = open('help.txt', 'r')
+            font = pygame.font.Font(None, 50)
+            screen.fill((0, 0, 0))
+            helptext = f.read()
+            stext = font.render(helptext, True, (0, 255, 255))
+            stext_x = width // 2 - stext.get_width() // 2
+            stext_y = height // 2 - stext.get_height() // 2
+            stext_w = stext.get_width()
+            stext_h = stext.get_height()
+            screen.blit(stext, (stext_x, stext_y))
+            pygame.display.flip()
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        finexit = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            running = False
+                            selector = 0
+                time.sleep(0.01)
         if finexit:
             break
     pygame.quit()
