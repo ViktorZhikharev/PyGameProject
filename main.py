@@ -54,13 +54,7 @@ class Bullet(pygame.sprite.Sprite):
             self.kill()
         k = False
         for i in all_sprites.sprites():
-            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Bomber':
-                k = True
-                bang = i
-            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Fighter':
-                k = True
-                bang = i
-            if pygame.sprite.collide_mask(self, i) and type(i).__name__ == 'Rocket':
+            if pygame.sprite.collide_mask(self, i) and issubclass(type(i), Plane):
                 k = True
                 bang = i
         if not pygame.sprite.collide_mask(self, mountain) and not k:
@@ -101,7 +95,7 @@ class Background(pygame.sprite.Sprite):
 
 
 class Plane(pygame.sprite.Sprite):
-    def __init__(self, pos, image, spd):
+    def __init__(self, pos, image='pln1.png', spd=0.5):
         super().__init__(all_sprites)
         self.image = load_image(image, -1)
         self.rect = self.image.get_rect()
@@ -115,6 +109,11 @@ class Plane(pygame.sprite.Sprite):
             self.kill()
         if not pygame.sprite.collide_mask(self, mountain):
             self.rect = self.rect.move(*self.vector.tuple())
+
+    def kill(self, bul=False):
+        if bul:
+            Kaboom((self.rect.x, self.rect.y), 'kaboom.png', 10)
+        super().kill()
 
 
 class Bomber(Plane):
