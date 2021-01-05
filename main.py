@@ -48,9 +48,11 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = height
         self.rect.x = pos[0]
         self.rect.y = pos[1]
+        self.border = False
         
     def update(self):
         if self.rect.x not in range(width) or self.rect.y not in range(height):
+            self.border = True
             self.kill()
         k = False
         for i in all_sprites.sprites():
@@ -62,8 +64,12 @@ class Bullet(pygame.sprite.Sprite):
         else:
             if k:
                 bang.kill(True)
-            Kaboom((self.rect.x, self.rect.y), 'kaboom.png')
             self.kill()
+
+    def kill(self):
+        if not self.border:
+            Kaboom((self.rect.x, self.rect.y), 'kaboom.png')
+        super().kill()
 
 
 class Vect():
@@ -178,6 +184,29 @@ class Cloud(pygame.sprite.Sprite):
             self.kill()
 
 
+class NukeBullet(Bullet):
+    def kill(self):
+        if not self.border:
+            NukeKaboom((self.rect.x - 75, self.rect.y - 75), 'nukekaboom.png', 60)
+        super().kill()
+
+
+class NukeKaboom(Kaboom):
+    def update(self):
+        k = False
+        for i in all_sprites.sprites():
+            if pygame.sprite.collide_mask(self, i) and issubclass(type(i), Plane):
+                k = True
+                bang = i
+        else:
+            if k:
+                bang.kill(True)
+        if self.ttl != 0:
+                self.ttl -= 1
+        else:
+            self.kill()
+
+
 AA_vect = Vect(270, 1.3)
 
 
@@ -197,6 +226,7 @@ if __name__ == '__main__':
             aa_pos = (420, 530)
         running = check = True
         shoot = tl = tr = False
+        spd = 12
         while running:
             if score < 0:
                 screen.fill((0, 0, 0))
@@ -228,6 +258,12 @@ if __name__ == '__main__':
                 atext_w = atext.get_width()
                 atext_h = atext.get_height()
                 screen.blit(atext, (atext_x, atext_y))
+                ltext = font.render('level: ' + str(fc // 10000 + 1), True, (100, 255, 100))
+                ltext_x = width // 2 - ltext.get_width() // 2
+                ltext_y = 50 - ltext.get_height() // 2
+                ltext_w = ltext.get_width()
+                ltext_h = ltext.get_height()
+                screen.blit(ltext, (ltext_x, ltext_y))
                 dt = clock.tick(120)
                 for event in pygame.event.get():
                     if event.type == pygame.QUIT:
@@ -246,13 +282,18 @@ if __name__ == '__main__':
                             tl = False
                         if event.key == pygame.K_RIGHT:
                             tr = False
-                if shoot and fc % 8 == 0 and ammo != 0:
-                    ammo -= 1
-                    Bullet(aa_pos, 'blt1.png')
+                if shoot and fc % spd == 0 and ammo != 0:
+                    if fc < 50000:
+                        ammo -= 1
+                        Bullet(aa_pos, 'blt1.png')
+                    if fc > 50000:
+                        NukeBullet(aa_pos, 'blt1.png')
                 if fc < 10000:
                     if fc % lvlcount == 0:
                         Bomber((width - 1, random.randint(80, 250)))
                 elif fc >= 10000 and fc < 100000:
+                    if lvlcount == 0:
+                        lvlcount = 1
                     if fc % lvlcount == 0:
                         if random.choice([True, False]):
                             Bomber((width - 1, random.randint(80, 250)))
@@ -277,6 +318,12 @@ if __name__ == '__main__':
                 if not random.randint(0, 1000):
                     Cloud((1480, random.randint(80, 250)))
                 pygame.display.flip()
+                if fc == 20000:
+                    spd = 8
+                if fc == 30000:
+                    spd = 4
+                if fc == 50000:
+                    spd = 18
         if not running:
             break
     pygame.quit()
