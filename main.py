@@ -12,7 +12,7 @@ def load_image(name, colorkey=None):
     if colorkey is not None:
         image = image.convert()
         if colorkey == -1:
-            colorkey = image.get_at((0, 0))
+            colorkey = image.get_at((0, 0)) 
         image.set_colorkey(colorkey)
     else:
         image = image.convert_alpha()
@@ -22,7 +22,7 @@ def load_image(name, colorkey=None):
 class Kaboom(pygame.sprite.Sprite):
     def __init__(self, pos, image, delay=10):
         super().__init__(all_sprites)
-        self.image = load_image(image, -1)
+        self.image = load_image(image)
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
@@ -97,7 +97,7 @@ class Background(pygame.sprite.Sprite):
 class Plane(pygame.sprite.Sprite):
     def __init__(self, pos, image='pln1.png', spd=0.5):
         super().__init__(all_sprites)
-        self.image = load_image(image, -1)
+        self.image = load_image(image)
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.x = pos[0]
@@ -124,7 +124,7 @@ class Bomber(Plane):
         global score, ammo
         if key:
             score += 100
-            ammo += 15
+            ammo += 10
             Kaboom((self.rect.x, self.rect.y - 50), 'bomberboom.png', 20)
         else:
             score -= 100
@@ -139,7 +139,7 @@ class Fighter(Plane):
         global score, ammo
         if key:
             score += 50
-            ammo += 20
+            ammo += 15
             Kaboom((self.rect.x, self.rect.y - 25), 'fighterboom.png', 15)
         else:
             score -= 50
@@ -159,6 +159,23 @@ class Rocket(Plane):
         else:
             score -= 150
         super().kill()
+
+
+class Cloud(pygame.sprite.Sprite):
+    def __init__(self, pos):
+        super().__init__(all_sprites)
+        self.image = pygame.transform.scale(load_image('cloud.png'), (random.randint(100, 200), random.randint(50, 100)))
+        self.rect = self.image.get_rect()
+        self.mask = pygame.mask.from_surface(self.image)
+        self.rect.bottom = height
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.vector = Vect(180, 0.2)
+
+    def update(self):
+        self.rect = self.rect.move(*self.vector.tuple())
+        if self.rect.x not in range(-200, width):
+            self.kill()
 
 
 AA_vect = Vect(270, 1.3)
@@ -234,22 +251,22 @@ if __name__ == '__main__':
                     Bullet(aa_pos, 'blt1.png')
                 if fc < 10000:
                     if fc % lvlcount == 0:
-                        Bomber((width - 1, random.randint(0, 250)))
+                        Bomber((width - 1, random.randint(80, 250)))
                 elif fc >= 10000 and fc < 100000:
                     if fc % lvlcount == 0:
                         if random.choice([True, False]):
-                            Bomber((width - 1, random.randint(0, 250)))
+                            Bomber((width - 1, random.randint(80, 250)))
                         else:
-                            Fighter((width - 1, random.randint(0, 350)))
+                            Fighter((width - 1, random.randint(80, 350)))
                 else:
                     if fc % lvlcount == 0:
                         chose = random.randint(1,  5)
                         if chose == 1 or chose == 2:
-                            Bomber((width - 1, random.randint(0, 250)))
+                            Bomber((width - 1, random.randint(80, 250)))
                         elif chose == 3 or chose == 4:
-                            Fighter((width - 1, random.randint(0, 350)))
+                            Fighter((width - 1, random.randint(80, 350)))
                         else:
-                            Rocket((width - 1, random.randint(0, 350)))
+                            Rocket((width - 1, random.randint(80, 350)))
                 if tl:
                     AA_vect.turn(-1)
                 if tr:
@@ -257,6 +274,8 @@ if __name__ == '__main__':
                 fc += 1
                 if fc % 10000 == 0:
                     lvlcount //= 2
+                if not random.randint(0, 1000):
+                    Cloud((1480, random.randint(80, 250)))
                 pygame.display.flip()
         if not running:
             break
