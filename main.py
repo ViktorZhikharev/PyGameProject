@@ -1,4 +1,4 @@
-import pygame, os, sys, random, time, math, copy
+import pygame, os, sys, random, datetime, math, copy
 
 size = width, height = 1500, 1000
 screen = pygame.display.set_mode(size)
@@ -121,8 +121,13 @@ class Bomber(Plane):
         super().__init__(pos, 'bmb.png', 0.3)
 
     def kill(self, key=False):
+        global score, ammo
         if key:
+            score += 100
+            ammo += 15
             Kaboom((self.rect.x, self.rect.y - 50), 'bomberboom.png', 20)
+        else:
+            score -= 100
         super().kill()
 
 
@@ -131,8 +136,13 @@ class Fighter(Plane):
         super().__init__(pos, 'fgt.png', 0.6)
 
     def kill(self, key=False):
+        global score, ammo
         if key:
+            score += 50
+            ammo += 20
             Kaboom((self.rect.x, self.rect.y - 25), 'fighterboom.png', 15)
+        else:
+            score -= 50
         super().kill()
 
 
@@ -141,8 +151,13 @@ class Rocket(Plane):
         super().__init__(pos, 'rct.png', 1)
 
     def kill(self, key=False):
+        global score, ammo
         if key:
+            score += 150
+            ammo += 45
             Kaboom((self.rect.x, self.rect.y - 25), 'bomberboom.png', 20)
+        else:
+            score -= 150
         super().kill()
 
 
@@ -150,66 +165,99 @@ AA_vect = Vect(270, 1.3)
 
 
 if __name__ == '__main__':
+    pygame.display.set_caption('PyGameProject')
+    pygame.init()
+    selector = 1
     while True:
-        pygame.display.set_caption('PyGameProject')
-        pygame.init()
         fc = 0
+        score = 0
+        ammo = 100
         lvlcount = 240
         clock = pygame.time.Clock()
         all_sprites = pygame.sprite.Group()
-        mountain = Background('lvl1.png')
+        if selector == 1:
+            mountain = Background('lvl1.png')
+            aa_pos = (420, 530)
         running = check = True
         shoot = tl = tr = False
         while running:
-            screen.fill((66, 170, 255))
-            all_sprites.draw(screen)
-            all_sprites.update()
-            dt = clock.tick(120)
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
-                        shoot = True
-                    if event.key == pygame.K_LEFT:
-                        tl = True
-                    if event.key == pygame.K_RIGHT:
-                        tr = True
-                if event.type == pygame.KEYUP:
-                    if event.key == pygame.K_SPACE:
-                        shoot = False
-                    if event.key == pygame.K_LEFT:
-                        tl = False
-                    if event.key == pygame.K_RIGHT:
-                        tr = False
-            if shoot and fc % 8 == 0:
-                Bullet((420, 530), 'blt1.png')
-            if fc < 10000:
-                if fc % lvlcount == 0:
-                    Bomber((width - 1, random.randint(0, 250)))
-            elif fc >= 10000 and fc < 100000:
-                if fc % lvlcount == 0:
-                    if random.choice([True, False]):
-                        Bomber((width - 1, random.randint(0, 250)))
-                    else:
-                        Fighter((width - 1, random.randint(0, 350)))
+            if score < 0:
+                screen.fill((0, 0, 0))
+                font = pygame.font.Font(None, 150)
+                stext = font.render('Game Over', True, (0, 255, 255))
+                stext_x = width // 2 - stext.get_width() // 2
+                stext_y = height // 2 - stext.get_height() // 2
+                stext_w = stext.get_width()
+                stext_h = stext.get_height()
+                screen.blit(stext, (stext_x, stext_y))
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                pygame.display.flip()
             else:
-                if fc % lvlcount == 0:
-                    chose = random.randint(1,  5)
-                    if chose == 1 or chose == 2:
+                screen.fill((66, 170, 255))
+                all_sprites.draw(screen)
+                all_sprites.update()
+                font = pygame.font.Font(None, 50)
+                stext = font.render('Score: ' + str(score), True, (100, 255, 100))
+                stext_x = width - 150 - stext.get_width() // 2
+                stext_y = 50 - stext.get_height() // 2
+                stext_w = stext.get_width()
+                stext_h = stext.get_height()
+                screen.blit(stext, (stext_x, stext_y))
+                atext = font.render('Ammo: ' + str(ammo), True, (100, 255, 100))
+                atext_x = 150 - atext.get_width() // 2
+                atext_y = 50 - atext.get_height() // 2
+                atext_w = atext.get_width()
+                atext_h = atext.get_height()
+                screen.blit(atext, (atext_x, atext_y))
+                dt = clock.tick(120)
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            shoot = True
+                        if event.key == pygame.K_LEFT:
+                            tl = True
+                        if event.key == pygame.K_RIGHT:
+                            tr = True
+                    if event.type == pygame.KEYUP:
+                        if event.key == pygame.K_SPACE:
+                            shoot = False
+                        if event.key == pygame.K_LEFT:
+                            tl = False
+                        if event.key == pygame.K_RIGHT:
+                            tr = False
+                if shoot and fc % 8 == 0 and ammo != 0:
+                    ammo -= 1
+                    Bullet(aa_pos, 'blt1.png')
+                if fc < 10000:
+                    if fc % lvlcount == 0:
                         Bomber((width - 1, random.randint(0, 250)))
-                    elif chose == 3 or chose == 4:
-                        Fighter((width - 1, random.randint(0, 350)))
-                    else:
-                        Rocket((width - 1, random.randint(0, 350)))
-            if tl:
-                AA_vect.turn(-1)
-            if tr:
-                AA_vect.turn(1)
-            fc += 1
-            if fc % 10000 == 0:
-                lvlcount //= 2
-            pygame.display.flip()
+                elif fc >= 10000 and fc < 100000:
+                    if fc % lvlcount == 0:
+                        if random.choice([True, False]):
+                            Bomber((width - 1, random.randint(0, 250)))
+                        else:
+                            Fighter((width - 1, random.randint(0, 350)))
+                else:
+                    if fc % lvlcount == 0:
+                        chose = random.randint(1,  5)
+                        if chose == 1 or chose == 2:
+                            Bomber((width - 1, random.randint(0, 250)))
+                        elif chose == 3 or chose == 4:
+                            Fighter((width - 1, random.randint(0, 350)))
+                        else:
+                            Rocket((width - 1, random.randint(0, 350)))
+                if tl:
+                    AA_vect.turn(-1)
+                if tr:
+                    AA_vect.turn(1)
+                fc += 1
+                if fc % 10000 == 0:
+                    lvlcount //= 2
+                pygame.display.flip()
         if not running:
             break
     pygame.quit()
