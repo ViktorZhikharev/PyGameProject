@@ -250,6 +250,26 @@ class NukeKaboom(Kaboom):
             self.kill()
 
 
+class Barrel(pygame.sprite.Sprite):
+    def __init__(self, pos, image):
+        super().__init__(all_sprites)
+        self.image = load_image(image)
+        self.image = pygame.transform.rotate(self.image, 0 -(AA_vect.get_ang()))
+        self.rect = self.image.get_rect()
+        self.pos = pos
+        self.rect.bottom = height
+        self.rect.x = pos[0]
+        self.rect.y = pos[1]
+        self.border = False
+
+    def update(self):
+        self.image = pygame.transform.rotate(self.image, 0 -(AA_vect.get_ang()))
+        self.rect = self.image.get_rect()
+        self.rect.bottom = height
+        self.rect.x = self.pos[0]
+        self.rect.y = self.pos[1]
+
+
 AA_vect = Vect(270, 1.3)
 
 
@@ -292,6 +312,7 @@ if __name__ == '__main__':
         if selector == 1:
             mountain = Background('lvl1.png')
             aa_pos = (420, 530)
+            Barrel(aa_pos, 'barrel.png')
         if selector in range(1, 100):
             fc = 0
             score = 0
