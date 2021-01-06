@@ -67,15 +67,18 @@ class PGlist:
             return (mouse_pos[1] - self.left) // self.cell_size[1], (mouse_pos[0] - self.top) // self.cell_size[0]
 
     def on_click(self, cell_coords):
-        global selector, check
+        global selector, check, finexit
         if cell_coords == (1, 0):
             selector = 1
             check = False
         if cell_coords == (0, 0):
             selector = 100
             check = False
-        if cell_coords == (7, 0):
+        if cell_coords == (6, 0):
             selector = 101
+            check = False
+        if cell_coords == (7, 0):
+            finexit = True
             check = False
 
 
@@ -305,7 +308,7 @@ if __name__ == '__main__':
                 screen.fill((0, 0, 0))
                 board.render(screen)
                 font = pygame.font.Font(None, 50)
-                text1 = font.render('Green mountains', True, (255, 255, 255))
+                text1 = font.render('Green Mountains', True, (255, 255, 255))
                 text1_x = 350 - text1.get_width() // 2
                 text1_y = 250 - text1.get_height() // 2
                 text1_w = text1.get_width()
@@ -319,16 +322,22 @@ if __name__ == '__main__':
                 screen.blit(text2, (text2_x, text2_y))
                 text3 = font.render('Records', True, (255, 255, 255))
                 text3_x = 350 - text3.get_width() // 2
-                text3_y = 850 - text3.get_height() // 2
+                text3_y = 750 - text3.get_height() // 2
                 text3_w = text3.get_width()
                 text3_h = text3.get_height()
                 screen.blit(text3, (text3_x, text3_y))
+                text4 = font.render('Exit', True, (255, 255, 255))
+                text4_x = 350 - text4.get_width() // 2
+                text4_y = 850 - text4.get_height() // 2
+                text4_w = text4.get_width()
+                text4_h = text4.get_height()
+                screen.blit(text4, (text4_x, text4_y))
                 pygame.display.flip()
         if selector == 1:
             aa_pos = (420, 530)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl1.png')
-        if selector == 100:
+        elif selector == 100:
             f = open('help.txt', 'r')
             font = pygame.font.Font(None, 50)
             screen.fill((0, 0, 0))
@@ -351,7 +360,7 @@ if __name__ == '__main__':
                             running = False
                             selector = 0
                 time.sleep(0.01)
-        if selector == 101:
+        elif selector == 101:
             f = open('records.txt', 'r')
             font = pygame.font.Font(None, 50)
             screen.fill((0, 0, 0))
@@ -471,8 +480,7 @@ if __name__ == '__main__':
                             if event.key == pygame.K_RIGHT:
                                 tr = False
                             if event.key == pygame.K_ESCAPE:
-                                running = False
-                                selector = 0
+                                score = -100
                     if shoot and fc % spd == 0 and ammo != 0:
                         if fc < 50000:
                             ammo -= 1
