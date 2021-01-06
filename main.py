@@ -18,6 +18,20 @@ def load_image(name, colorkey=None):
         image = image.convert_alpha()
     return image
 
+def stat_update():
+    global maxscore, playtime
+    fl = open('records.txt', 'r')
+    li = [i.strip() for i in fl]
+    if maxscore > int(li[0]):
+        li[0] = maxscore
+    if playtime.total_seconds() > float(li[1]):
+        li[1] = playtime.total_seconds()
+    fl.close()
+    fr = open('records.txt', 'w')
+    fr.write(str(li[0]) + '\n')
+    fr.write(str(li[1]))
+    fr.close()
+
 
 class PGlist:
     def __init__(self, height):
@@ -59,6 +73,9 @@ class PGlist:
             check = False
         if cell_coords == (0, 0):
             selector = 100
+            check = False
+        if cell_coords == (7, 0):
+            selector = 101
             check = False
 
 
@@ -300,27 +317,105 @@ if __name__ == '__main__':
                 text2_w = text2.get_width()
                 text2_h = text2.get_height()
                 screen.blit(text2, (text2_x, text2_y))
+                text3 = font.render('Records', True, (255, 255, 255))
+                text3_x = 350 - text3.get_width() // 2
+                text3_y = 850 - text3.get_height() // 2
+                text3_w = text3.get_width()
+                text3_h = text3.get_height()
+                screen.blit(text3, (text3_x, text3_y))
                 pygame.display.flip()
         if selector == 1:
             aa_pos = (420, 530)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl1.png')
+        if selector == 100:
+            f = open('help.txt', 'r')
+            font = pygame.font.Font(None, 50)
+            screen.fill((0, 0, 0))
+            helptext = f.read()
+            stext = font.render(helptext, True, (0, 255, 255))
+            stext_x = width // 2 - stext.get_width() // 2
+            stext_y = height // 2 - stext.get_height() // 2
+            stext_w = stext.get_width()
+            stext_h = stext.get_height()
+            screen.blit(stext, (stext_x, stext_y))
+            pygame.display.flip()
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        finexit = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            running = False
+                            selector = 0
+                time.sleep(0.01)
+        if selector == 101:
+            f = open('records.txt', 'r')
+            font = pygame.font.Font(None, 50)
+            screen.fill((0, 0, 0))
+            helptext = f.read()
+            stext = font.render(helptext, True, (0, 255, 255))
+            stext_x = width // 2 - stext.get_width() // 2
+            stext_y = height // 2 - stext.get_height() // 2
+            stext_w = stext.get_width()
+            stext_h = stext.get_height()
+            screen.blit(stext, (stext_x, stext_y))
+            pygame.display.flip()
+            running = True
+            while running:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                        finexit = True
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            running = False
+                            selector = 0
+                time.sleep(0.01)
         if selector in range(1, 100):
+            starttime = datetime.datetime.now()
             fc = 0
             score = 0
+            maxscore = 0
             ammo = 100
             lvlcount = 240
-            running = check = True
+            running = check = check2 = True
             shoot = tl = tr = False
             spd = 12
             clock = pygame.time.Clock()
             while running:
                 if score < 0:
+                    if check2:
+                        check2 = False
+                        fintime = datetime.datetime.now()
+                        playtime = fintime - starttime
+                        stat_update()
                     screen.fill((0, 0, 0))
                     font = pygame.font.Font(None, 150)
                     stext = font.render('Game Over', True, (0, 255, 255))
                     stext_x = width // 2 - stext.get_width() // 2
                     stext_y = height // 2 - stext.get_height() // 2
+                    stext_w = stext.get_width()
+                    stext_h = stext.get_height()
+                    screen.blit(stext, (stext_x, stext_y))
+                    font = pygame.font.Font(None, 50)
+                    stext = font.render('Your time: ' + str(playtime), True, (0, 255, 255))
+                    stext_x = width // 2 - stext.get_width() // 2
+                    stext_y = height // 2 - stext.get_height() // 2 + 150
+                    stext_w = stext.get_width()
+                    stext_h = stext.get_height()
+                    screen.blit(stext, (stext_x, stext_y))
+                    stext = font.render('Max score: ' + str(maxscore), True, (0, 255, 255))
+                    stext_x = width // 2 - stext.get_width() // 2
+                    stext_y = height // 2 - stext.get_height() // 2 + 200
+                    stext_w = stext.get_width()
+                    stext_h = stext.get_height()
+                    screen.blit(stext, (stext_x, stext_y))
+                    stext = font.render('Press [escape] to go to menu', True, (0, 255, 255))
+                    stext_x = width // 2 - stext.get_width() // 2
+                    stext_y = height // 2 - stext.get_height() // 2 + 250
                     stext_w = stext.get_width()
                     stext_h = stext.get_height()
                     screen.blit(stext, (stext_x, stext_y))
@@ -420,29 +515,8 @@ if __name__ == '__main__':
                         spd = 4
                     if fc == 50000:
                         spd = 18
-        if selector == 100:
-            f = open('help.txt', 'r')
-            font = pygame.font.Font(None, 50)
-            screen.fill((0, 0, 0))
-            helptext = f.read()
-            stext = font.render(helptext, True, (0, 255, 255))
-            stext_x = width // 2 - stext.get_width() // 2
-            stext_y = height // 2 - stext.get_height() // 2
-            stext_w = stext.get_width()
-            stext_h = stext.get_height()
-            screen.blit(stext, (stext_x, stext_y))
-            pygame.display.flip()
-            running = True
-            while running:
-                for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
-                        running = False
-                        finexit = True
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            running = False
-                            selector = 0
-                time.sleep(0.01)
+                    if maxscore <= score:
+                        maxscore = score
         if finexit:
             break
     pygame.quit()
