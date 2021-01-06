@@ -250,24 +250,16 @@ class NukeKaboom(Kaboom):
             self.kill()
 
 
-class Barrel(pygame.sprite.Sprite):
+class Bunker(pygame.sprite.Sprite):
     def __init__(self, pos, image):
         super().__init__(all_sprites)
         self.image = load_image(image)
-        self.image = pygame.transform.rotate(self.image, 0 -(AA_vect.get_ang()))
         self.rect = self.image.get_rect()
         self.pos = pos
         self.rect.bottom = height
         self.rect.x = pos[0]
         self.rect.y = pos[1]
         self.border = False
-
-    def update(self):
-        self.image = pygame.transform.rotate(self.image, 0 -(AA_vect.get_ang()))
-        self.rect = self.image.get_rect()
-        self.rect.bottom = height
-        self.rect.x = self.pos[0]
-        self.rect.y = self.pos[1]
 
 
 AA_vect = Vect(270, 1.3)
@@ -310,9 +302,9 @@ if __name__ == '__main__':
                 screen.blit(text2, (text2_x, text2_y))
                 pygame.display.flip()
         if selector == 1:
-            mountain = Background('lvl1.png')
             aa_pos = (420, 530)
-            Barrel(aa_pos, 'barrel.png')
+            Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
+            mountain = Background('lvl1.png')
         if selector in range(1, 100):
             fc = 0
             score = 0
@@ -336,6 +328,10 @@ if __name__ == '__main__':
                         if event.type == pygame.QUIT:
                             running = False
                             finexit = True
+                        if event.type == pygame.KEYUP:
+                            if event.key == pygame.K_ESCAPE:
+                                running = False
+                                selector = 0
                     pygame.display.flip()
                 else:
                     screen.fill((66, 170, 255))
