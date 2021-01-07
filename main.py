@@ -71,6 +71,9 @@ class PGlist:
         if cell_coords == (1, 0):
             selector = 1
             check = False
+        if cell_coords == (2, 0):
+            selector = 2
+            check = False
         if cell_coords == (0, 0):
             selector = 100
             check = False
@@ -290,7 +293,7 @@ if __name__ == '__main__':
     pygame.init()
     selector = 0
     finexit = False
-    while True:
+    while True: 
         all_sprites = pygame.sprite.Group()
         if selector == 0:
             board = PGlist(8)
@@ -332,22 +335,24 @@ if __name__ == '__main__':
                 text4_w = text4.get_width()
                 text4_h = text4.get_height()
                 screen.blit(text4, (text4_x, text4_y))
+                text5 = font.render('Battleship', True, (255, 255, 255))
+                text5_x = 350 - text5.get_width() // 2
+                text5_y = 350 - text5.get_height() // 2
+                text5_w = text5.get_width()
+                text5_h = text5.get_height()
+                screen.blit(text5, (text5_x, text5_y))
                 pygame.display.flip()
         if selector == 1:
             aa_pos = (420, 530)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl1.png')
+        if selector == 2:
+            aa_pos = (700, 569)
+            mountain = Background('lvl2.png')
         elif selector == 100:
-            f = open('help.txt', 'r')
-            font = pygame.font.Font(None, 50)
+            Background('help.png')
             screen.fill((0, 0, 0))
-            helptext = f.read()
-            stext = font.render(helptext, True, (0, 255, 255))
-            stext_x = width // 2 - stext.get_width() // 2
-            stext_y = height // 2 - stext.get_height() // 2
-            stext_w = stext.get_width()
-            stext_h = stext.get_height()
-            screen.blit(stext, (stext_x, stext_y))
+            all_sprites.draw(screen)
             pygame.display.flip()
             running = True
             while running:
@@ -362,12 +367,18 @@ if __name__ == '__main__':
                 time.sleep(0.01)
         elif selector == 101:
             f = open('records.txt', 'r')
-            font = pygame.font.Font(None, 50)
+            font = pygame.font.Font(None, 100)
             screen.fill((0, 0, 0))
-            helptext = f.read()
-            stext = font.render(helptext, True, (0, 255, 255))
+            helptext = [i.strip() for i in f]
+            stext = font.render('best score: ' + helptext[0], True, (0, 255, 255))
             stext_x = width // 2 - stext.get_width() // 2
             stext_y = height // 2 - stext.get_height() // 2
+            stext_w = stext.get_width()
+            stext_h = stext.get_height()
+            screen.blit(stext, (stext_x, stext_y))
+            stext = font.render('best time: ' + str(datetime.timedelta(microseconds=(float(helptext[1]) * (10 ** 6)))), True, (0, 255, 255))
+            stext_x = width // 2 - stext.get_width() // 2
+            stext_y = height // 2 - stext.get_height() // 2 + 150
             stext_w = stext.get_width()
             stext_h = stext.get_height()
             screen.blit(stext, (stext_x, stext_y))
@@ -389,7 +400,7 @@ if __name__ == '__main__':
             score = 0
             maxscore = 0
             ammo = 100
-            lvlcount = 240
+            lvlcount = 960
             running = check = check2 = True
             shoot = tl = tr = False
             spd = 12
@@ -481,11 +492,12 @@ if __name__ == '__main__':
                                 tr = False
                             if event.key == pygame.K_ESCAPE:
                                 score = -100
-                    if shoot and fc % spd == 0 and ammo != 0:
+                    if shoot and fc % spd == 0 and ammo > 0:
                         if fc < 50000:
                             ammo -= 1
                             Bullet(aa_pos, 'blt1.png')
                         if fc > 50000:
+                            ammo -= 25
                             NukeBullet(aa_pos, 'blt1.png')
                     if fc < 10000:
                         if fc % lvlcount == 0:
@@ -522,7 +534,7 @@ if __name__ == '__main__':
                     if fc == 30000:
                         spd = 4
                     if fc == 50000:
-                        spd = 18
+                        spd = 24
                     if maxscore <= score:
                         maxscore = score
         if finexit:
