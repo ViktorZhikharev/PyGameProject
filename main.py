@@ -68,20 +68,17 @@ class PGlist:
 
     def on_click(self, cell_coords):
         global selector, check, finexit
-        if cell_coords == (1, 0):
-            selector = 1
-            check = False
-        if cell_coords == (2, 0):
-            selector = 2
-            check = False
         if cell_coords == (0, 0):
             selector = 100
             check = False
-        if cell_coords == (6, 0):
+        elif cell_coords == (4, 0):
             selector = 101
             check = False
-        if cell_coords == (7, 0):
+        elif cell_coords == (5, 0):
             finexit = True
+            check = False
+        else:
+            selector = cell_coords[0]
             check = False
 
 
@@ -179,8 +176,7 @@ class Plane(pygame.sprite.Sprite):
     def update(self):
         if self.rect.x not in range(-200, width) or self.rect.y not in range(- 200, height):
             self.kill()
-        if not pygame.sprite.collide_mask(self, mountain):
-            self.rect = self.rect.move(*self.vector.tuple())
+        self.rect = self.rect.move(*self.vector.tuple())
 
     def kill(self, bul=False):
         if bul:
@@ -296,8 +292,9 @@ if __name__ == '__main__':
     while True: 
         all_sprites = pygame.sprite.Group()
         if selector == 0:
-            board = PGlist(8)
+            board = PGlist(6)
             board.set_view(100, 100, (500, 100))
+            Background('mainmenu.png')
             running = check = True
             while running:
                 for event in pygame.event.get():
@@ -309,6 +306,8 @@ if __name__ == '__main__':
                 if not check:
                     running = False
                 screen.fill((0, 0, 0))
+                all_sprites.update()
+                all_sprites.draw(screen)
                 board.render(screen)
                 font = pygame.font.Font(None, 50)
                 text1 = font.render('Green Mountains', True, (255, 255, 255))
@@ -325,13 +324,13 @@ if __name__ == '__main__':
                 screen.blit(text2, (text2_x, text2_y))
                 text3 = font.render('Records', True, (255, 255, 255))
                 text3_x = 350 - text3.get_width() // 2
-                text3_y = 750 - text3.get_height() // 2
+                text3_y = 550 - text3.get_height() // 2
                 text3_w = text3.get_width()
                 text3_h = text3.get_height()
                 screen.blit(text3, (text3_x, text3_y))
                 text4 = font.render('Exit', True, (255, 255, 255))
                 text4_x = 350 - text4.get_width() // 2
-                text4_y = 850 - text4.get_height() // 2
+                text4_y = 650 - text4.get_height() // 2
                 text4_w = text4.get_width()
                 text4_h = text4.get_height()
                 screen.blit(text4, (text4_x, text4_y))
@@ -341,6 +340,12 @@ if __name__ == '__main__':
                 text5_w = text5.get_width()
                 text5_h = text5.get_height()
                 screen.blit(text5, (text5_x, text5_y))
+                text6 = font.render('Megapolis', True, (255, 255, 255))
+                text6_x = 350 - text6.get_width() // 2
+                text6_y = 450 - text6.get_height() // 2
+                text6_w = text6.get_width()
+                text6_h = text6.get_height()
+                screen.blit(text6, (text6_x, text6_y))
                 pygame.display.flip()
         if selector == 1:
             aa_pos = (420, 530)
@@ -349,6 +354,10 @@ if __name__ == '__main__':
         if selector == 2:
             aa_pos = (700, 569)
             mountain = Background('lvl2.png')
+        if selector == 3:
+            aa_pos = (920, 550)
+            Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
+            mountain = Background('lvl3.png')
         elif selector == 100:
             Background('help.png')
             screen.fill((0, 0, 0))
@@ -496,9 +505,11 @@ if __name__ == '__main__':
                         if fc < 50000:
                             ammo -= 1
                             Bullet(aa_pos, 'blt1.png')
+                            Kaboom(aa_pos, 'kaboom.png', 5)
                         if fc > 50000:
                             ammo -= 25
                             NukeBullet(aa_pos, 'blt1.png')
+                            Kaboom(aa_pos, 'kaboom.png', 5) 
                     if fc < 10000:
                         if fc % lvlcount == 0:
                             Bomber((width - 1, random.randint(80, 250)))
