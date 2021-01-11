@@ -1,7 +1,15 @@
-import pygame, os, sys, random, time, datetime, math, copy
+import pygame
+import os
+import sys
+import random
+import time
+import datetime
+import math
+import copy
 
 size = width, height = 1500, 1000
 screen = pygame.display.set_mode(size)
+
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('images', name)
@@ -17,6 +25,7 @@ def load_image(name, colorkey=None):
     else:
         image = image.convert_alpha()
     return image
+
 
 def stat_update():
     global maxscore, playtime
@@ -51,9 +60,19 @@ class PGlist:
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
                 if self.board[i][j] == 0:
-                    pygame.draw.rect(canvas, pygame.Color('white'), (self.left + j * self.cell_size[0], self.top + i * self.cell_size[1], self.cell_size[0], self.cell_size[1]), 1)
+                    pygame.draw.rect(canvas, pygame.Color('white'), (self.left +
+                                                                     j * self.cell_size[0],
+                                                                     self.top +
+                                                                     i * self.cell_size[1],
+                                                                     self.cell_size[0],
+                                                                     self.cell_size[1]), 1)
                 elif self.board[i][j] == 1:
-                    pygame.draw.rect(canvas, pygame.Color('white'), (self.left + j * self.cell_size[0], self.top + i * self.cell_size[1], self.cell_size[0], self.cell_size[1]), 0)
+                    pygame.draw.rect(canvas, pygame.Color('white'), (self.left +
+                                                                     j * self.cell_size[0],
+                                                                     self.top +
+                                                                     i * self.cell_size[1],
+                                                                     self.cell_size[0],
+                                                                     self.cell_size[1]), 0)
 
     def get_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
@@ -61,10 +80,12 @@ class PGlist:
 
     def get_cell(self, mouse_pos):
         if (mouse_pos[1] not in range(self.left, self.left + self.cell_size[1] * len(self.board)) or
-            mouse_pos[0] not in range(self.top, self.top + self.cell_size[0] * len(self.board[0]))):
+                mouse_pos[0] not in range(self.top,
+                                          self.top + self.cell_size[0] * len(self.board[0]))):
             return None
         else:
-            return (mouse_pos[1] - self.left) // self.cell_size[1], (mouse_pos[0] - self.top) // self.cell_size[0]
+            return ((mouse_pos[1] - self.left) // self.cell_size[1],
+                    (mouse_pos[0] - self.top) // self.cell_size[0])
 
     def on_click(self, cell_coords):
         global selector, check, finexit
@@ -105,7 +126,7 @@ class Bullet(pygame.sprite.Sprite):
         super().__init__(all_sprites)
         self.image = load_image(image, -1)
         self.vector = copy.deepcopy(AA_vect)
-        self.image = pygame.transform.rotate(self.image, 0 -(self.vector.get_ang()))
+        self.image = pygame.transform.rotate(self.image, 0 - (self.vector.get_ang()))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
@@ -148,7 +169,8 @@ class Vect():
         self.mod += deltamod
     
     def tuple(self):
-        return dt * self.mod * math.cos(math.radians(self.ang)), dt * self.mod * math.sin(math.radians(self.ang))
+        return (dt * self.mod * math.cos(math.radians(self.ang)),
+                dt * self.mod * math.sin(math.radians(self.ang)))
 
     def get_ang(self):
         return self.ang
@@ -232,7 +254,9 @@ class Rocket(Plane):
 class Cloud(pygame.sprite.Sprite):
     def __init__(self, pos):
         super().__init__(all_sprites)
-        self.image = pygame.transform.scale(load_image('cloud.png'), (random.randint(100, 200), random.randint(50, 100)))
+        self.image = pygame.transform.scale(load_image('cloud.png'),
+                                            (random.randint(100, 200),
+                                             random.randint(50, 100)))
         self.rect = self.image.get_rect()
         self.mask = pygame.mask.from_surface(self.image)
         self.rect.bottom = height
@@ -264,7 +288,7 @@ class NukeKaboom(Kaboom):
             if k:
                 bang.kill(True)
         if self.ttl != 0:
-                self.ttl -= 1
+            self.ttl -= 1
         else:
             self.kill()
 
@@ -294,7 +318,6 @@ if __name__ == '__main__':
         if selector == 0:
             board = PGlist(6)
             board.set_view(100, 100, (500, 100))
-            Background('mainmenu.png')
             running = check = True
             while running:
                 for event in pygame.event.get():
@@ -306,8 +329,8 @@ if __name__ == '__main__':
                 if not check:
                     running = False
                 screen.fill((0, 0, 0))
-                all_sprites.update()
-                all_sprites.draw(screen)
+                img = load_image('mainmenu.png', -1)
+                screen.blit(img, (0, 0))
                 board.render(screen)
                 font = pygame.font.Font(None, 50)
                 text1 = font.render('Green Mountains', True, (255, 255, 255))
@@ -385,7 +408,10 @@ if __name__ == '__main__':
             stext_w = stext.get_width()
             stext_h = stext.get_height()
             screen.blit(stext, (stext_x, stext_y))
-            stext = font.render('best time: ' + str(datetime.timedelta(microseconds=(float(helptext[1]) * (10 ** 6)))), True, (0, 255, 255))
+            stext = font.render('best time: ' +
+                                str(datetime.timedelta(microseconds=(float(helptext[1]) *
+                                                                     (10 ** 6)))),
+                                True, (0, 255, 255))
             stext_x = width // 2 - stext.get_width() // 2
             stext_y = height // 2 - stext.get_height() // 2 + 150
             stext_w = stext.get_width()
@@ -523,7 +549,7 @@ if __name__ == '__main__':
                                 Fighter((width - 1, random.randint(80, 350)))
                     else:
                         if fc % lvlcount == 0:
-                            chose = random.randint(1,  5)
+                            chose = random.randint(1, 5)
                             if chose == 1 or chose == 2:
                                 Bomber((width - 1, random.randint(80, 250)))
                             elif chose == 3 or chose == 4:
