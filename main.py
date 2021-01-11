@@ -315,7 +315,8 @@ if __name__ == '__main__':
     finexit = False
     while True: 
         all_sprites = pygame.sprite.Group()
-        if selector == 0:
+        reinit = False
+        if selector == 0 and not reinit:
             board = PGlist(6)
             board.set_view(100, 100, (500, 100))
             running = check = True
@@ -437,11 +438,25 @@ if __name__ == '__main__':
             ammo = 100
             lvlcount = 960
             running = check = check2 = True
-            shoot = tl = tr = False
+            shoot = tl = tr = paused = ap = False
             spd = 12
             clock = pygame.time.Clock()
             while running:
-                if score < 0:
+                if paused:
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            running = False
+                            finexit = True
+                        if event.type == pygame.KEYUP:
+                            if event.key == pygame.K_ESCAPE:
+                                running = False
+                                selector = 0
+                                paused = False
+                            if event.key == pygame.K_p:
+                                paused = False
+                                starttime += (datetime.datetime.now() - pausetime)
+                                ap = True
+                elif score < 0:
                     if check2:
                         check2 = False
                         fintime = datetime.datetime.now()
@@ -483,6 +498,11 @@ if __name__ == '__main__':
                                 running = False
                                 selector = 0
                     pygame.display.flip()
+                elif reinit:
+                    fintime = datetime.datetime.now()
+                    playtime = fintime - starttime
+                    stat_update()
+                    running = False
                 else:
                     screen.fill((66, 170, 255))
                     all_sprites.draw(screen)
@@ -507,6 +527,9 @@ if __name__ == '__main__':
                     ltext_h = ltext.get_height()
                     screen.blit(ltext, (ltext_x, ltext_y))
                     dt = clock.tick(120)
+                    if ap:
+                        dt = 0
+                        ap = False
                     for event in pygame.event.get():
                         if event.type == pygame.QUIT:
                             running = False
@@ -527,6 +550,11 @@ if __name__ == '__main__':
                                 tr = False
                             if event.key == pygame.K_ESCAPE:
                                 score = -100
+                            if event.key == pygame.K_p:
+                                paused = True
+                                pausetime = datetime.datetime.now()
+                            if event.key == pygame.K_r:
+                                reinit = True
                     if shoot and fc % spd == 0 and ammo > 0:
                         if fc < 50000:
                             ammo -= 1
