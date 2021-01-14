@@ -205,8 +205,7 @@ class Plane(pygame.sprite.Sprite):
 
     def kill(self, bul=False):
         if bul:
-            Kaboom((self.rect.x, self.rect.y), 'kaboom.png', 10)
-        bamsound.play()
+            bamsound.play()
         super().kill()
 
 
@@ -222,7 +221,7 @@ class Bomber(Plane):
             Kaboom((self.rect.x, self.rect.y - 50), 'bomberboom.png', 20)
         else:
             score -= 100
-        super().kill()
+        super().kill(key)
 
 
 class Fighter(Plane):
@@ -237,7 +236,7 @@ class Fighter(Plane):
             Kaboom((self.rect.x, self.rect.y - 25), 'fighterboom.png', 15)
         else:
             score -= 50
-        super().kill()
+        super().kill(key)
 
 
 class Rocket(Plane):
@@ -252,7 +251,7 @@ class Rocket(Plane):
             Kaboom((self.rect.x, self.rect.y - 25), 'bomberboom.png', 20)
         else:
             score -= 150
-        super().kill()
+        super().kill(key)
 
 
 class Cloud(pygame.sprite.Sprite):
@@ -379,13 +378,19 @@ if __name__ == '__main__':
             aa_pos = (420, 530)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl1.png')
+            pygame.mixer_music.load('Sounds/greenmount.ogg')
+            pygame.mixer_music.play(loops=-1)
         if selector == 2:
             aa_pos = (700, 569)
             mountain = Background('lvl2.png')
+            pygame.mixer_music.load('Sounds/battleship.ogg')
+            pygame.mixer_music.play(loops=-1)
         if selector == 3:
             aa_pos = (920, 550)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl3.png')
+            pygame.mixer_music.load('Sounds/megapolis.ogg')
+            pygame.mixer_music.play(loops=-1)
         elif selector == 100:
             Background('help.png')
             screen.fill((0, 0, 0))
@@ -459,11 +464,13 @@ if __name__ == '__main__':
                             if event.key == pygame.K_p:
                                 paused = False
                                 starttime += (datetime.datetime.now() - pausetime)
+                                pygame.mixer_music.unpause()
                                 ap = True
                 elif score < 0:
                     if check2:
                         check2 = False
                         fintime = datetime.datetime.now()
+                        pygame.mixer_music.unload()
                         playtime = fintime - starttime
                         stat_update()
                     screen.fill((0, 0, 0))
@@ -503,6 +510,9 @@ if __name__ == '__main__':
                                 selector = 0
                     pygame.display.flip()
                 elif reinit:
+                    pygame.mixer_music.unload()
+                    pygame.mixer_music.load('Sounds/backmusic.ogg')
+                    pygame.mixer_music.play(loops=-1)
                     fintime = datetime.datetime.now()
                     playtime = fintime - starttime
                     stat_update()
@@ -557,6 +567,7 @@ if __name__ == '__main__':
                             if event.key == pygame.K_p:
                                 paused = True
                                 pausetime = datetime.datetime.now()
+                                pygame.mixer_music.pause()
                             if event.key == pygame.K_r:
                                 reinit = True
                     if shoot and fc % spd == 0 and ammo > 0:
