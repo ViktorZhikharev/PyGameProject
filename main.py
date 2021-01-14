@@ -312,7 +312,7 @@ AA_vect = Vect(270, 1.3)
 
 
 if __name__ == '__main__':
-    pygame.display.set_caption('PyGameProject')
+    pygame.display.set_caption('AntiAirsim2021')
     pygame.init()
     selector = 0
     finexit = False
