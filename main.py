@@ -7,8 +7,11 @@ import datetime
 import math
 import copy
 
+pygame.mixer.init()
 size = width, height = 1500, 1000
 screen = pygame.display.set_mode(size)
+shotsound = pygame.mixer.Sound('Sounds/shot.ogg')
+bamsound = pygame.mixer.Sound('Sounds/bam.ogg')
 
 
 def load_image(name, colorkey=None):
@@ -203,6 +206,7 @@ class Plane(pygame.sprite.Sprite):
     def kill(self, bul=False):
         if bul:
             Kaboom((self.rect.x, self.rect.y), 'kaboom.png', 10)
+        bamsound.play()
         super().kill()
 
 
@@ -556,6 +560,7 @@ if __name__ == '__main__':
                             if event.key == pygame.K_r:
                                 reinit = True
                     if shoot and fc % spd == 0 and ammo > 0:
+                        shotsound.play()
                         if fc < 50000:
                             ammo -= 1
                             Bullet(aa_pos, 'blt1.png')
