@@ -380,17 +380,20 @@ if __name__ == '__main__':
             mountain = Background('lvl1.png')
             pygame.mixer_music.load('Sounds/greenmount.ogg')
             pygame.mixer_music.play(loops=-1)
+            pygame.mixer_music.set_volume(0.4)
         if selector == 2:
             aa_pos = (700, 569)
             mountain = Background('lvl2.png')
             pygame.mixer_music.load('Sounds/battleship.ogg')
             pygame.mixer_music.play(loops=-1)
+            pygame.mixer_music.set_volume(0.4)
         if selector == 3:
             aa_pos = (920, 550)
             Bunker((aa_pos[0] - 20, aa_pos[1] - 5), 'bunker.png')
             mountain = Background('lvl3.png')
             pygame.mixer_music.load('Sounds/megapolis.ogg')
             pygame.mixer_music.play(loops=-1)
+            pygame.mixer_music.set_volume(0.4)
         elif selector == 100:
             Background('help.png')
             screen.fill((0, 0, 0))
